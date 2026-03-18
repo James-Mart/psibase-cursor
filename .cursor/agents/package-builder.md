@@ -1,5 +1,6 @@
 ---
 name: package-builder
+model: fast
 description: Infer and build affected psibase package targets from provided modified files, or build a specified package target directly.
 ---
 
@@ -33,7 +34,7 @@ For `build`:
    - `packages/user/<Name>/...`
 2. If no modified file matches one of those patterns, report that no package rebuild is needed.
 3. For each matching path, derive candidate target `<Name>` from the path segment immediately after `local`, `system`, or `user`.
-4. Deduplicate candidate targets before verification.
+4. Deduplicate candidate targets.
 
 ### build
 1. Treat `PackageName` as the candidate target.
@@ -41,21 +42,29 @@ For `build`:
 ## Verification
 Use the repo-root `CMakeLists.txt` as the source of truth.
 
-For each candidate target `<Name>`, verify that it is a buildable package target by checking for one of:
+A candidate `<Name>` is verified if either of the following is found in the repo-root `CMakeLists.txt`:
 - a `psibase_package(...)` definition with `NAME <Name>`
 - a `cargo_psibase_package(...)` definition that produces `<Name>.psi`
 
-If a candidate cannot be verified, report that it could not be verified and do not guess.
+If `<Name>.psi` is found, `<Name>` is the package target name. DO NOT perform additional confirmation steps.
+
+If a candidate cannot be verified from the repo-root `CMakeLists.txt`, report that it could not be verified and do not guess.
 
 ## Build
-From the repo root, build each verified target with:
+Once a candidate target is verified, build it immediately from the repo root with:
 
 `cmake --build build -j 4 --target <Name>`
 
+Do not inspect `build/` or perform extra target-resolution steps before running the build.
+
 Stop on the first failing build.
+Do not retry a failed build.
+Do not rerun the same build command after a failure unless the user explicitly asks.
+Do not attempt recovery steps after a failure.
 
 ## Output
 - If nothing needs rebuilding, say so.
 - On success, report the target(s) built.
-- On failure, report the failing target and the build error details.
+- On failure, report the failing target, the command that failed, and the relevant error details.
+- After a failure, stop and wait for user instruction.
 - If a requested target cannot be verified, say that directly.
