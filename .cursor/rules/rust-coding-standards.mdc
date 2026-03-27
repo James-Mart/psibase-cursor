@@ -1,0 +1,25 @@
+---
+description: Rust coding standards for avoiding unnecessary allocations
+globs: **/*.rs
+alwaysApply: false
+---
+
+# Avoid eager allocations for deferred-use data
+
+Don't collect or clone data that is only needed on a cold path (e.g. error/panic messages). Defer the work to the point of use.
+
+```rust
+// ❌ BAD: clones names eagerly even though they're only used in a panic
+let names: Vec<String> = items.iter().map(|i| i.name.clone()).collect();
+do_work(&items);
+result.unwrap_or_else(|| panic!("failed for {}", names.join(", ")));
+
+// ✅ GOOD: build the list only when the panic fires, borrow instead of clone
+do_work(&items);
+result.unwrap_or_else(|| {
+    let names: Vec<_> = items.iter().map(|i| i.name.as_str()).collect();
+    panic!("failed for {}", names.join(", "));
+});
+```
+
+Similarly, prefer iterating a borrowed collection directly over collecting into an intermediate `Vec` when a single pass suffices.
