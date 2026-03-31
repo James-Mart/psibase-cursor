@@ -62,9 +62,24 @@ Do not retry a failed build.
 Do not rerun the same build command after a failure unless the user explicitly asks.
 Do not attempt recovery steps after a failure.
 
+## Post-build size report
+After every **successful** package build:
+
+1. Run the print-package-info skill from the repo root for the same `<Name>`:
+
+   `bash .cursor/skills/print-package-info/scripts/print-package-info.sh <Name>`
+
+2. Include in your response:
+   - The path to the `.psi` archive,
+   - The archive size in bytes,
+   - The list of extracted files with their sizes,
+   - The size in bytes of each wasm file in the package.
+
+If the print script fails, report that failure but do **not** rerun the build.
+
 ## Output
 - If nothing needs rebuilding, say so.
-- On success, report the target(s) built.
+- On success, report the target(s) built and the print-package-info output (or its failure).
 - On failure, report the failing target, the command that failed, and the relevant error details.
 - After a failure, stop and wait for user instruction.
 - If a requested target cannot be verified, say that directly.

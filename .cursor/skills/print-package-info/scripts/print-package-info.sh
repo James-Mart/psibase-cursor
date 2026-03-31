@@ -8,7 +8,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 package_name="$1"
-archive_path="./build/psidk/share/psibase/packages/${package_name}.psi"
+archive_path="./build/share/psibase/packages/${package_name}.psi"
 
 if [[ ! -f "$archive_path" ]]; then
   echo "Package archive not found: $archive_path" >&2
