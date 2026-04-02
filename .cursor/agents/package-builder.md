@@ -62,6 +62,15 @@ Do not retry a failed build.
 Do not rerun the same build command after a failure unless the user explicitly asks.
 Do not attempt recovery steps after a failure.
 
+## Install
+After **all** package target builds in this invocation succeed, run CMake install from the repo root so package archives are installed under `CMAKE_INSTALL_PREFIX`.
+
+`cmake --install build --component ServerData`
+
+Use the same build directory as the build step (if a different build directory is used, substitute that path).
+
+If install fails, report the command and errors; do **not** retry automatically.
+
 ## Post-build size report
 After every **successful** package build:
 
@@ -79,7 +88,7 @@ If the print script fails, report that failure but do **not** rerun the build.
 
 ## Output
 - If nothing needs rebuilding, say so.
-- On success, report the target(s) built and the print-package-info output (or its failure).
+- On success, report the target(s) built, whether install succeeded (or install failure details), and the print-package-info output (or its failure).
 - On failure, report the failing target, the command that failed, and the relevant error details.
 - After a failure, stop and wait for user instruction.
 - If a requested target cannot be verified, say that directly.
